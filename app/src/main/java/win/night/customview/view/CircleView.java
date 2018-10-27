@@ -1,6 +1,7 @@
 package win.night.customview.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,12 +9,14 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import win.night.customview.R;
+
 /**
  * 自定义circleView
  */
 public class CircleView extends View {
 
-    private int mDefaultColor = Color.RED;
+    private int mBackgroundColor = Color.RED;
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public CircleView(Context context) {
@@ -23,19 +26,26 @@ public class CircleView extends View {
     }
 
     public CircleView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
         init();
     }
 
 
     public CircleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircleView);
+
+        if (typedArray.hasValue(R.styleable.CircleView_circle_color)) {
+            mBackgroundColor = typedArray.getColor(R.styleable.CircleView_circle_color, Color.RED);
+        }
+        typedArray.recycle();
+
         init();
     }
 
 
     private void init() {
-        mPaint.setColor(mDefaultColor);
+        mPaint.setColor(mBackgroundColor);
     }
 
     @Override
@@ -52,5 +62,25 @@ public class CircleView extends View {
 
         int radius = Math.min(width, height) / 2;
         canvas.drawCircle(paddingLeft + width / 2, paddingTop + height / 2, radius, mPaint);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int widthMeasureSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthMeasureSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMeasureSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightMeasureSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        //default width = 200 default height = 200
+        if (widthMeasureSpecMode == MeasureSpec.AT_MOST && heightMeasureSpecMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(200, 200);
+        } else if (widthMeasureSpecMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(200, heightMeasureSpecSize);
+        } else if (heightMeasureSpecMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(widthMeasureSpecSize, 200);
+        }
+
     }
 }
